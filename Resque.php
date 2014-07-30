@@ -24,15 +24,23 @@ class Resque
         \Resque_Redis::prefix($prefix);
     }
 
-    public function setRedisConfiguration($host, $port, $database)
+    public function setRedisConfiguration($host = 'localhost', $port = '6379', $database = 0, $password = NULL)
     {
         $this->redisConfiguration = array(
             'host'     => $host,
             'port'     => $port,
             'database' => $database,
+            'password' => $password
         );
 
-        \Resque::setBackend($host.':'.$port, $database);
+        $redis = 'redis://:';
+
+        if (!empty($password)) {
+            $redis = $redis . $password . '@';
+        }
+
+        $redis = $redis . $host . ':' . $port;
+        \Resque::setBackend($redis, $database);
     }
 
     public function getRedisConfiguration()
