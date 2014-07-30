@@ -36,15 +36,22 @@ class Resque
         \Resque_Redis::prefix($prefix);
     }
 
-    public function setRedisConfiguration($host, $port, $database)
+    public function setRedisConfiguration($host, $port, $database, $password = null)
     {
         $this->redisConfiguration = array(
             'host'     => $host,
             'port'     => $port,
             'database' => $database,
+            'password' => $password
         );
 
-        \Resque::setBackend($host.':'.$port, $database);
+        if (!isset($password)) {
+            \Resque::setBackend($host.':'.$port, $database);
+        } else {
+            $server = 'redis://:' . $password . '@' . $host . ':' . $port;
+            \Resque::setBackend($server, $database);
+            \Resque::redis()->auth($password);
+        }
     }
 
     public function setGlobalRetryStrategy($strategy)
